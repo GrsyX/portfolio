@@ -19,7 +19,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <!-- Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         body {
@@ -94,7 +94,7 @@
                 background: none !important;
             }
             
-            /* Haupt-Container */
+            /* Haupt-Container (Die dunkle Box) wird im Druck hellgrau oder weiß mit Rahmen */
             .bg-slate-900\/50, .bg-slate-900 {
                 background-color: #fff !important;
                 border: 1px solid #cbd5e1 !important;
@@ -105,7 +105,7 @@
                 page-break-inside: avoid;
             }
 
-            /* Textfarben */
+            /* Textfarben in der Box anpassen (von Weiß auf Dunkel) */
             .text-slate-200, .text-slate-300, .text-slate-400 {
                 color: #334155 !important;
             }
@@ -113,7 +113,7 @@
                 color: #0f172a !important;
             }
 
-            /* Badges */
+            /* Spezifische Anpassung für Badges */
             .rounded-full.bg-slate-800 {
                 background-color: #f1f5f9 !important; /* Hellgrau */
                 border-color: #94a3b8 !important;
@@ -127,7 +127,7 @@
                 border-left: 4px solid #eab308 !important;
             }
 
-            /* Mockup */
+            /* Mockup darf dunkel bleiben, da es ein "Bild" ist, aber ohne Schatten */
             .mockup-container {
                 box-shadow: none !important;
                 border: 1px solid #94a3b8 !important;
@@ -142,7 +142,7 @@
             
             /* SVG Farben im Druck anpassen */
             rect.fill-slate-800 {
-                fill: #f1f5f9 !important;
+                fill: #f1f5f9 !important; /* Helle Boxen */
                 stroke: #64748b !important;
             }
             text.fill-slate-200 {
@@ -166,7 +166,7 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
         
-        // --- LUCIDE ICON FIX ---
+        // --- LUCIDE ICON FIX (ROBUST & SAFE) ---
         const createLucideIcon = (iconName, iconData) => {
             if (!iconData || !Array.isArray(iconData)) {
                 return () => null;
@@ -227,9 +227,9 @@
                     <div className="bg-white px-2 py-1 flex items-center justify-between shrink-0">
                         <div className="flex items-center gap-2">
                             <div className="w-4 h-4 bg-transparent relative flex items-center justify-center">
-                                <span className="text-black font-serif italic font-bold"> </span> 
+                                <span className="text-black font-serif italic font-bold">f</span> 
                             </div>
-                            <span className="text-xs text-black">AudioTranskription AI Tool</span>
+                            <span className="text-xs text-black">Audio-Transkription</span>
                         </div>
                         <div className="flex gap-4 px-2">
                             <Minus size={12} className="text-black" />
@@ -294,7 +294,7 @@
                             <span className="mt-1">Bereit</span>
                         </div>
 
-                        {/* Output Box */}
+                        {/* Output Box - Grows to fill space */}
                         <div className="w-full bg-[#1e1e1e] border border-gray-500 mt-1 flex-1 min-h-[120px]"></div>
                     </div>
                 </div>
@@ -302,9 +302,9 @@
         };
 
         const TechBadge = ({ icon: Icon, label }) => (
-            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-sm hover:border-teal-500/50 hover:text-teal-400 transition-colors cursor-default">
+            <div className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-xs font-medium hover:border-teal-500/50 hover:text-teal-400 transition-colors cursor-default">
                 {Icon && <Icon size={14} className="shrink-0" />}
-                <span className="leading-none pt-[1px]">{label}</span>
+                <span>{label}</span>
             </div>
         );
 
@@ -426,6 +426,14 @@
         // --- MAIN APP COMPONENT ---
 
         const App = () => {
+            const handlePrint = () => {
+                try {
+                    window.print();
+                } catch (e) {
+                    alert("Drucken wurde blockiert. Bitte benutze Strg+P (Windows) oder Cmd+P (Mac), um die Seite als PDF zu speichern.");
+                }
+            };
+
             return (
                 <div className="min-h-screen flex flex-col selection:bg-teal-500/30">
                     
@@ -437,6 +445,8 @@
                         </div>
 
                         <div className="max-w-5xl mx-auto relative z-10">
+                            {/* Print Button removed as requested, use browser print instead */}
+
                             <div className="inline-block px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-teal-400 text-xs font-semibold mb-4 tracking-wide uppercase">
                                 Python Developer Portfolio
                             </div>
@@ -448,8 +458,8 @@
                                 Mein aktuelles Projekt verbindet Python GUI-Entwicklung mit moderner Speech-to-Text Technologie.
                             </p>
                             
-                            <div className="flex gap-4 no-print">
-                                {/* Link */}
+                            <div className="flex gap-4 no-print justify-center">
+                                {/* Link und Text angepasst wie gewünscht */}
                                 <a href="https://grsyx.github.io/portfolio/" className="px-6 py-3 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium transition-all shadow-lg shadow-teal-900/20 flex items-center gap-2">
                                     Meine weiteren Projekte ansehen <ChevronRight size={18} />
                                 </a>
@@ -464,7 +474,7 @@
                             {/* PROJECT CARD */}
                             <div className="bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden">
                                 
-                                {/* Project Header Section */}
+                                {/* Project Header Section (2-Columns Top) */}
                                 <div className="p-8 md:p-12 border-b border-slate-800">
                                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-12 items-stretch">
                                         
@@ -472,8 +482,8 @@
                                         <div className="lg:col-span-7 flex flex-col">
                                             <div className="mb-8">
                                                 <div className="flex items-center gap-3 mb-4">
-                                                    <h2 className="text-3xl md:text-4xl font-bold text-white">AudioTranskription AI Tool</h2>
-                                                    <span className="px-2.5 py-0.5 rounded bg-blue-500/10 text-blue-400 text-xs font-bold border border-blue-500/20">DESKTOP APP</span>
+                                                    <h2 className="text-2xl font-bold text-white">AudioTranskription AI Tool</h2>
+                                                    <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-[10px] font-bold border border-blue-500/20 uppercase tracking-wider flex items-center">DESKTOP APP</span>
                                                 </div>
                                                 <p className="text-lg text-slate-300 font-medium mb-6 border-l-4 border-teal-500 pl-4 py-1 bg-slate-800/30 rounded-r">
                                                     Lokale Transkriptions‑App (Python, Whisper) mit GUI, PDF‑Export und Denoising.
@@ -490,13 +500,13 @@
                                                     </div>
                                                 </div>
 
-                                                <div className="flex flex-wrap gap-2 mb-8">
-                                                    <TechBadge icon={Terminal} label="Python 3.x" />
-                                                    <TechBadge icon={Layers} label="tkinter" />
-                                                    <TechBadge icon={Cpu} label="OpenAI Whisper" />
-                                                    <TechBadge icon={Mic} label="ffmpeg" />
-                                                    <TechBadge icon={FileText} label="ReportLab (PDF Engine)" />
-                                                    <TechBadge icon={ShieldCheck} label="NoiseReduce" />
+                                                <div className="flex flex-wrap gap-2 mb-8 justify-center">
+                                                    <TechBadge icon={Terminal} label="Python 3.10  " />
+                                                    <TechBadge icon={Layers} label="tkinter  " />
+                                                    <TechBadge icon={Cpu} label="OpenAI Whisper  " />
+                                                    <TechBadge icon={Mic} label="ffmpeg  " />
+                                                    <TechBadge icon={FileText} label="ReportLab (PDF Engine)  " />
+                                                    <TechBadge icon={ShieldCheck} label="NoiseReduce  " />
                                                 </div>
                                             </div>
 
