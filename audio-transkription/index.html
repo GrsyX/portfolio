@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - AudioTranskription Developer</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons (Vanilla) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0; /* Slate 200 */
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #2dd4bf, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* --- PRINT STYLES (Optimiert für PDF Export) --- */
+        @media print {
+            @page {
+                margin: 0.5cm;
+                size: A4;
+            }
+            body {
+                background-color: white !important;
+                color: #1e293b !important; /* Dunkelgrauer Text */
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            /* Verstecke UI Elemente */
+            .no-print, button, .print-hide {
+                display: none !important;
+            }
+            /* Layout Anpassungen */
+            #root {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            /* Header sauber */
+            header {
+                padding: 20px 0 !important;
+                border-bottom: 2px solid #e2e8f0 !important;
+                background: transparent !important;
+            }
+            header h1 {
+                color: #0f172a !important;
+                font-size: 2.5rem !important;
+            }
+            header p {
+                color: #475569 !important;
+            }
+            .gradient-text {
+                -webkit-text-fill-color: #0f172a !important;
+                color: #0f172a !important;
+                background: none !important;
+            }
+            
+            /* Haupt-Container (Die dunkle Box) wird im Druck hellgrau oder weiß mit Rahmen */
+            .bg-slate-900\/50, .bg-slate-900 {
+                background-color: #fff !important;
+                border: 1px solid #cbd5e1 !important;
+                color: #334155 !important;
+                box-shadow: none !important;
+                border-radius: 8px !important;
+                margin-bottom: 20px !important;
+                page-break-inside: avoid;
+            }
+            /* Textfarben in der Box anpassen (von Weiß auf Dunkel) */
+            .text-slate-200, .text-slate-300, .text-slate-400 {
+                color: #334155 !important;
+            }
+            .text-white {
+                color: #0f172a !important;
+            }
+            /* Spezifische Anpassung für Badges */
+            .rounded-full.bg-slate-800 {
+                background-color: #f1f5f9 !important; /* Hellgrau */
+                border-color: #94a3b8 !important;
+                color: #334155 !important;
+            }
+            /* Motivation Box */
+            .bg-gradient-to-r {
+                background: #f8fafc !important;
+                border: 1px solid #e2e8f0 !important;
+                border-left: 4px solid #eab308 !important;
+            }
+            /* Mockup darf dunkel bleiben, da es ein "Bild" ist, aber ohne Schatten */
+            .mockup-container {
+                box-shadow: none !important;
+                border: 1px solid #94a3b8 !important;
+                page-break-inside: avoid;
+            }
+            /* Milestone Graph Container */
+            .bg-slate-800\/40 {
+                background-color: #fff !important;
+                border: 1px solid #cbd5e1 !important;
+            }
+            
+            /* SVG Farben im Druck anpassen */
+            rect.fill-slate-800 {
+                fill: #f1f5f9 !important; /* Helle Boxen */
+                stroke: #64748b !important;
+            }
+            text.fill-slate-200 {
+                fill: #0f172a !important;
+            }
+            text.fill-slate-500 {
+                fill: #475569 !important;
+            }
+            
+            /* Footer */
+            footer {
+                border-top: 1px solid #e2e8f0 !important;
+                color: #64748b !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // --- LUCIDE ICON FIX (ROBUST & SAFE) ---
+        const createLucideIcon = (iconName, iconData) => {
+            if (!iconData || !Array.isArray(iconData)) {
+                return () => null;
+            }
+            
+            const [tag, attrs, children] = iconData;
+            const safeAttrs = (attrs && typeof attrs === 'object' && !Array.isArray(attrs)) ? attrs : {};
+            const childrenToRender = Array.isArray(children) ? children : [];
+            
+            return ({ color = "currentColor", size = 24, strokeWidth = 2, className, ...props }) => {
+                return (
+                    <svg
+                        {...safeAttrs}
+                        width={size}
+                        height={size}
+                        stroke={color}
+                        strokeWidth={strokeWidth}
+                        className={`lucide lucide-${iconName} ${className || ''}`}
+                        {...props}
+                    >
+                        {childrenToRender.map((child, index) => {
+                            if (!Array.isArray(child)) return null;
+                            const [childTag, childAttrs] = child;
+                            const safeChildAttrs = (childAttrs && typeof childAttrs === 'object' && !Array.isArray(childAttrs)) ? childAttrs : {};
+                            return React.createElement(childTag, { ...safeChildAttrs, key: index });
+                        })}
+                    </svg>
+                );
+            };
+        };
+        const lucideSource = lucide.icons || lucide;
+        const iconList = [
+            "FileAudio", "FileText", "Cpu", "Download", "Layers", 
+            "ShieldCheck", "Terminal", "Mic", "CheckCircle2", 
+            "ChevronRight", "Github", "ExternalLink", "Mail", "ArrowDown",
+            "Minus", "Square", "X", "BarChart3", "Zap", "AlertTriangle", "PieChart",
+            "Unlock", "Infinity", "Clock", "Coins", "GitBranch", "Printer", "Rocket", "Users"
+        ];
+        
+        const Icons = {};
+        iconList.forEach(name => {
+            if (lucideSource[name]) {
+                Icons[name] = createLucideIcon(name, lucideSource[name]);
+            } else {
+                Icons[name] = () => null; 
+            }
+        });
+        
+        const { FileAudio, FileText, Cpu, Download, Layers, ShieldCheck, Terminal, Mic, CheckCircle2, ChevronRight, Github, ExternalLink, Mail, ArrowDown, Minus, Square, X, BarChart3, Zap, AlertTriangle, PieChart, Unlock, Infinity: InfinityIcon, Clock, Coins, GitBranch, Printer, Rocket, Users } = Icons;
+        // --- COMPONENTS ---
+        const AppMockup = ({ className = "" }) => {
+            return (
+                <div className={`mockup-container bg-[#2b2b2b] rounded-none border border-gray-600 shadow-2xl overflow-hidden w-full mx-auto font-sans text-sm select-none transform hover:scale-[1.01] transition-transform duration-500 flex flex-col ${className}`}>
+                    {/* Window Title Bar */}
+                    <div className="bg-white px-2 py-1 flex items-center justify-between shrink-0">
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-transparent relative flex items-center justify-center">
+                                <span className="text-black font-serif italic font-bold">f</span> 
+                            </div>
+                            <span className="text-xs text-black">Audio-Transkription</span>
+                        </div>
+                        <div className="flex gap-4 px-2">
+                            <Minus size={12} className="text-black" />
+                            <Square size={10} className="text-black" />
+                            <X size={12} className="text-black" />
+                        </div>
+                    </div>
+                    {/* Menu Bar */}
+                    <div className="bg-[#f0f0f0] px-1 py-0.5 border-b border-gray-300 flex gap-4 text-xs text-black shrink-0">
+                        <span className="hover:bg-blue-200 px-1 cursor-default">Datei</span>
+                        <span className="hover:bg-blue-200 px-1 cursor-default">Sprache</span>
+                        <span className="hover:bg-blue-200 px-1 cursor-default">Layout</span>
+                    </div>
+                    {/* Main Content Area - FLEX GROW */}
+                    <div className="bg-[#333333] p-4 flex flex-col items-center gap-3 text-gray-200 flex-1">
+                        <div className="flex flex-col gap-2 w-48">
+                            <button className="bg-[#4d4d4d] hover:bg-[#5a5a5a] border border-gray-500 text-white py-1 px-4 text-xs shadow-sm">
+                                Audiodatei auswählen
+                            </button>
+                            <button className="bg-[#4d4d4d] opacity-70 border border-gray-600 text-gray-400 py-1 px-4 text-xs shadow-sm cursor-not-allowed">
+                                Transkribieren
+                            </button>
+                            <button className="bg-[#4d4d4d] opacity-70 border border-gray-600 text-gray-400 py-1 px-4 text-xs shadow-sm cursor-not-allowed">
+                                Transkript kopieren
+                            </button>
+                            <button className="bg-[#4d4d4d] hover:bg-[#5a5a5a] border border-gray-500 text-white py-1 px-4 text-xs shadow-sm">
+                                Störgeräusche entfernen
+                            </button>
+                            <button className="bg-[#4d4d4d] hover:bg-[#5a5a5a] border border-gray-500 text-white py-1 px-4 text-xs shadow-sm">
+                                Als PDF exportieren
+                            </button>
+                        </div>
+                        <div className="flex flex-col items-center gap-1 mt-1 w-full">
+                            <label className="text-xs text-white">Sprache auswählen:</label>
+                            <div className="bg-white text-black text-xs w-32 px-1 py-0.5 flex justify-between items-center cursor-default">
+                                <span>Türkisch</span>
+                                <ChevronRight size={10} className="rotate-90" />
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-white">
+                            <div className="w-3 h-3 bg-white border border-gray-400 rounded-none"></div>
+                            <label>Automatisch ins Englische übersetzen</label>
+                        </div>
+                        <div className="flex flex-col items-center gap-1 w-full">
+                            <label className="text-xs text-white">Schriftgröße auswählen:</label>
+                            <div className="bg-white text-black text-xs w-32 px-1 py-0.5 flex justify-between items-center cursor-default">
+                                <span>12</span>
+                                <ChevronRight size={10} className="rotate-90" />
+                            </div>
+                        </div>
+                        <div className="w-full h-3 bg-gray-200 mt-1 border border-gray-400"></div>
+                        <div className="flex flex-col items-center text-xs text-white gap-0.5">
+                            <span>0%</span>
+                            <span>Wörter: 0 Sätze: 0</span>
+                            <span className="mt-1">Bereit</span>
+                        </div>
+                        {/* Output Box - Grows to fill space */}
+                        <div className="w-full bg-[#1e1e1e] border border-gray-500 mt-1 flex-1 min-h-[120px]"></div>
+                    </div>
+                </div>
+            );
+        };
+        const TechBadge = ({ icon: Icon, label }) => (
+            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-sm hover:border-teal-500/50 hover:text-teal-400 transition-colors cursor-default">
+                {Icon && <Icon size={14} className="shrink-0" />}
+                <span className="leading-none pt-[1px]">{label}</span>
+            </div>
+        );
+        const SectionTitle = ({ children }) => (
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                <span className="w-8 h-1 bg-teal-500 rounded-full"></span>
+                {children}
+            </h2>
+        );
+        const BulletPoint = ({ title, text }) => (
+            <div className="flex gap-3 items-start group">
+                <div className="mt-1.5">
+                    <CheckCircle2 size={18} className="text-teal-500 group-hover:text-teal-400 transition-colors" />
+                </div>
+                <div>
+                    <strong className="text-white block mb-0.5">{title}</strong>
+                    <p className="text-slate-400 text-sm leading-relaxed">{text}</p>
+                </div>
+            </div>
+        );
+        // --- MILESTONE GRAPH COMPONENT ---
+        const MilestoneGraph = () => {
+            const boxWidth = 140;
+            const boxHeight = 55;
+            const gapX = 60;
+            const startX = 10;
+            const startY = 10;
+            
+            const yTop = startY;
+            const yMid = startY + boxHeight + 40; 
+            const yBot = startY + (boxHeight + 40) * 2;
+            const c1 = startX;
+            const c2 = startX + boxWidth + gapX;
+            const c3 = startX + (boxWidth + gapX) * 2;
+            const c4 = startX + (boxWidth + gapX) * 3;
+            const c5 = startX + (boxWidth + gapX) * 4;
+            const c6 = startX + (boxWidth + gapX) * 5;
+            const c7 = startX + (boxWidth + gapX) * 6;
+            const c8 = startX + (boxWidth + gapX) * 7;
+            const nodes = [
+                { id: 'A', label: 'Projektstart', x: c1, y: yMid },
+                { id: 'B', label: 'Modellintegration', sub: 'logic/whisper_worker', x: c2, y: yMid },
+                { id: 'B1', label: 'Audio-Vorverarb.', sub: 'FFmpeg', x: c3, y: yMid },
+                { id: 'B2', label: 'Modell-Tests', sub: 'Quality/Smoke', x: c4, y: yMid },
+                { id: 'C', label: 'GUI', sub: 'tkinter', x: c5, y: yMid },
+                
+                { id: 'C1', label: 'UI-Polish', sub: 'Darkmode/Status', x: c6, y: yTop },
+                { id: 'D', label: 'PDF-Export', sub: 'reportlab', x: c7, y: yTop },
+                
+                { id: 'E', label: 'Denoising', sub: 'noisereduce', x: c6, y: yMid },
+                
+                { id: 'F', label: 'README & Docs', sub: 'Case Study', x: c6, y: yBot },
+                { id: 'F1', label: 'i18n Texte', sub: 'json config', x: c7, y: yBot },
+                { id: 'Req', label: 'Requirements', sub: 'requirements.txt', x: c8, y: yBot },
+            ];
+            const edges = [
+                { from: 'A', to: 'B' },
+                { from: 'B', to: 'B1' },
+                { from: 'B1', to: 'B2' },
+                { from: 'B2', to: 'C' },
+                { from: 'C', to: 'C1' },
+                { from: 'C1', to: 'D' },
+                { from: 'C', to: 'E' },
+                { from: 'C', to: 'F' },
+                { from: 'F', to: 'F1' },
+                { from: 'F1', to: 'Req' },
+            ];
+            const getNode = (id) => nodes.find(n => n.id === id);
+            const getPath = (n1, n2) => {
+                const x1 = n1.x + boxWidth;
+                const y1 = n1.y + boxHeight / 2;
+                const x2 = n2.x;
+                const y2 = n2.y + boxHeight / 2;
+                const dist = (x2 - x1) / 2;
+                return `M ${x1} ${y1} C ${x1 + dist} ${y1}, ${x2 - dist} ${y2}, ${x2} ${y2}`;
+            };
+            const width = c8 + boxWidth + 20;
+            const height = yBot + boxHeight + 20;
+            return (
+                <div className="bg-slate-800/40 p-4 rounded-lg border border-slate-700/50 overflow-hidden no-print-bg">
+                    <h4 className="text-xs uppercase text-slate-400 font-bold tracking-wider mb-4 flex items-center gap-2">
+                        <GitBranch size={14} /> Projekt Meilensteine (Flowchart)
+                    </h4>
+                    <div className="overflow-x-auto pb-2 custom-scrollbar">
+                        <svg width={width} height={height} className="min-w-full">
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+                                </marker>
+                            </defs>
+                            {edges.map((edge, i) => {
+                                const n1 = getNode(edge.from);
+                                const n2 = getNode(edge.to);
+                                return <path key={i} d={getPath(n1, n2)} stroke="#475569" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />;
+                            })}
+                            {nodes.map((node) => (
+                                <g key={node.id} className="group cursor-default">
+                                    <rect x={node.x} y={node.y} width={boxWidth} height={boxHeight} rx="6" className="fill-slate-800 stroke-teal-500/30 group-hover:stroke-teal-400 transition-colors stroke-2" />
+                                    <circle cx={node.x + boxWidth - 10} cy={node.y + 10} r="3" className="fill-teal-500" />
+                                    <text x={node.x + 10} y={node.y + 20} className="fill-slate-200 text-[10px] font-bold font-sans">{node.label}</text>
+                                    <text x={node.x + 10} y={node.y + 38} className="fill-slate-500 text-[9px] font-mono">{node.sub || ''}</text>
+                                </g>
+                            ))}
+                        </svg>
+                    </div>
+                </div>
+            );
+        };
+        // --- MAIN APP COMPONENT ---
+        const App = () => {
+            const handlePrint = () => {
+                try {
+                    window.print();
+                } catch (e) {
+                    alert("Drucken wurde blockiert. Bitte benutze Strg+P (Windows) oder Cmd+P (Mac), um die Seite als PDF zu speichern.");
+                }
+            };
+            return (
+                <div className="min-h-screen flex flex-col selection:bg-teal-500/30">
+                    
+                    {/* HEADER / HERO */}
+                    <header className="relative pt-20 pb-16 px-6 lg:px-0 border-b border-slate-800">
+                        <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+                            <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-teal-600/10 rounded-full blur-3xl"></div>
+                            <div className="absolute bottom-[-10%] left-[-5%] w-72 h-72 bg-blue-600/10 rounded-full blur-3xl"></div>
+                        </div>
+                        <div className="max-w-5xl mx-auto relative z-10">
+                            {/* Print Button */}
+                            <div className="absolute top-0 right-0 mt-[-40px] md:mt-0 flex flex-col items-end gap-1">
+                                <button onClick={handlePrint} className="no-print flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg border border-slate-700 transition-colors text-sm shadow-lg">
+                                    <Printer size={16} /> Als PDF speichern
+                                </button>
+                                <span className="text-[10px] text-slate-500 no-print hidden md:block">Falls Button inaktiv: Strg+P drücken</span>
+                            </div>
+                            <div className="inline-block px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-teal-400 text-xs font-semibold mb-4 tracking-wide uppercase">
+                                Python Developer Portfolio
+                            </div>
+                            <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight text-white">
+                                Audio. <span className="gradient-text">Intelligence.</span> Offline.
+                            </h1>
+                            <p className="text-xl text-slate-400 max-w-2xl leading-relaxed mb-8">
+                                Ich entwickle lokale Softwarelösungen mit Fokus auf KI-Integration und Datensicherheit. 
+                                Mein aktuelles Projekt verbindet Python GUI-Entwicklung mit moderner Speech-to-Text Technologie.
+                            </p>
+                            
+                            <div className="flex gap-4 no-print">
+                                <a href="#project" className="px-6 py-3 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium transition-all shadow-lg shadow-teal-900/20 flex items-center gap-2">
+                                    Projekt ansehen <ArrowDown size={18} />
+                                </a>
+                            </div>
+                        </div>
+                    </header>
+                    {/* MAIN CONTENT */}
+                    <main className="flex-grow px-6 lg:px-0 py-16" id="project">
+                        <div className="max-w-5xl mx-auto">
+                            
+                            {/* PROJECT CARD */}
+                            <div className="bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden">
+                                
+                                {/* Project Header Section (2-Columns Top) */}
+                                <div className="p-8 md:p-12 border-b border-slate-800">
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-12 items-stretch">
+                                        
+                                        {/* Left Column: Info & Stats */}
+                                        <div className="lg:col-span-7 flex flex-col">
+                                            <div className="mb-8">
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <h2 className="text-3xl md:text-4xl font-bold text-white">AudioTranskription</h2>
+                                                    <span className="px-2.5 py-0.5 rounded bg-blue-500/10 text-blue-400 text-xs font-bold border border-blue-500/20">DESKTOP APP</span>
+                                                </div>
+                                                <p className="text-lg text-slate-300 font-medium mb-6 border-l-4 border-teal-500 pl-4 py-1 bg-slate-800/30 rounded-r">
+                                                    Lokale Transkriptions‑App (Python, Whisper) mit GUI, PDF‑Export und Denoising.
+                                                </p>
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                                    <div>
+                                                        <h3 className="text-xs uppercase text-slate-500 font-bold tracking-wider mb-2">Meine Rolle</h3>
+                                                        <p className="text-slate-200">Entwickler (Student)</p>
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-xs uppercase text-slate-500 font-bold tracking-wider mb-2">Kernaufgaben</h3>
+                                                        <p className="text-slate-400 text-sm">GUI mit tkinter, Modellanbindung (Whisper), PDF-Export, Denoising, Packaging (PyInstaller).</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-wrap gap-2 mb-8">
+                                                    <TechBadge icon={Terminal} label="Python 3.x" />
+                                                    <TechBadge icon={Layers} label="tkinter" />
+                                                    <TechBadge icon={Cpu} label="OpenAI Whisper" />
+                                                    <TechBadge icon={Mic} label="ffmpeg" />
+                                                    <TechBadge icon={FileText} label="ReportLab (PDF Engine)" />
+                                                    <TechBadge icon={ShieldCheck} label="NoiseReduce" />
+                                                </div>
+                                            </div>
+                                            {/* MOTIVATION SECTION */}
+                                            <div className="bg-gradient-to-r from-slate-800 to-slate-800/50 p-5 rounded-lg border-l-2 border-yellow-500 flex-grow">
+                                                <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                                                    <Unlock size={16} className="text-yellow-500"/> Projekt Motivation
+                                                </h3>
+                                                <p className="text-sm text-slate-400 leading-relaxed">
+                                                    Viele Online-Transkriptionstools locken mit kostenlosen Tests, sind aber stark limitiert (z.B. max. 10 Min) oder erfordern teure Abos für Features wie PDF-Export. Zudem ist der Upload sensibler Audio-Daten auf Cloud-Server oft datenschutzrechtlich problematisch.
+                                                    <br/><br/>
+                                                    <span className="text-teal-400 font-medium">Meine Lösung:</span> Eine 100% lokale, kostenlose und unlimitierte Anwendung.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {/* Right Column: App Visual - Full Height */}
+                                        <div className="lg:col-span-5 flex flex-col h-full min-h-[500px] lg:min-h-0">
+                                            <AppMockup className="h-full" />
+                                            <p className="text-center text-xs text-slate-600 mt-4">Screenshot Simulation (GUI Mockup)</p>
+                                        </div>
+                                    </div>
+                                    {/* Bottom Section: Full Width Milestone Graph */}
+                                    <div>
+                                        <MilestoneGraph />
+                                    </div>
+                                </div>
+                                {/* Content Tabs/Details (Bottom Section) */}
+                                <div className="bg-slate-900 p-8 md:p-12">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                                        
+                                        {/* Left Col: Successes & Future */}
+                                        <div>
+                                            <SectionTitle>Wichtigste Erfolge</SectionTitle>
+                                            <div className="space-y-6">
+                                                <BulletPoint 
+                                                    title="Offline-Inferenz" 
+                                                    text="Nutzt lokales Modell 'large-v3.pt' – keine Cloud nötig, volle Datenschutz-Konformität." 
+                                                />
+                                                <BulletPoint 
+                                                    title="GUI Entwicklung" 
+                                                    text="Vollständige Nutzeroberfläche in 'transcription_window.py' mit Datei-Auswahl, Fortschrittsanzeige und editierbarem Textfeld." 
+                                                />
+                                                <BulletPoint 
+                                                    title="Tool-Integration" 
+                                                    text="Implementierung von PDF-Export mittels 'reportlab' und Rauschreduktion durch 'noisereduce' & 'soundfile'." 
+                                                />
+                                                <BulletPoint 
+                                                    title="Architektur" 
+                                                    text="Saubere Trennung von UI und Logik: Inferenz läuft in 'whisper_worker.py', GUI bleibt reaktionsfähig." 
+                                                />
+                                                <BulletPoint 
+                                                    title="Deployment Ready" 
+                                                    text="'main.spec' und Hooks für PyInstaller sind integriert für die Erstellung ausführbarer Dateien." 
+                                                />
+                                            </div>
+                                            {/* NEW SECTION: Ausblick / Roadmap */}
+                                            <div className="mt-8 pt-4 border-t border-slate-800">
+                                                <h4 className="text-white font-bold text-sm mb-4">Ausblick & Roadmap</h4>
+                                                <div className="space-y-3">
+                                                    <div className="flex gap-3">
+                                                        <div className="mt-0.5 text-blue-400"><Rocket size={16} /></div>
+                                                        <p className="text-slate-400 text-sm">
+                                                            <strong className="text-slate-300">Performance Boost:</strong> Integration von CUDA/GPU Support für bis zu 10x schnellere Transkription.
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex gap-3">
+                                                        <div className="mt-0.5 text-teal-400"><Layers size={16} /></div>
+                                                        <p className="text-slate-400 text-sm">
+                                                            <strong className="text-slate-300">Batch-Processing:</strong> Verarbeitung ganzer Ordnerstrukturen im Hintergrund.
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex gap-3">
+                                                        <div className="mt-0.5 text-purple-400"><Users size={16} /></div>
+                                                        <p className="text-slate-400 text-sm">
+                                                            <strong className="text-slate-300">Speaker Diarization:</strong> Automatische Erkennung und Unterscheidung verschiedener Sprecher.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Right Col: Case Study & Lessons Learned */}
+                                        <div>
+                                            <SectionTitle>Deep Dive Case Study</SectionTitle>
+                                            <div className="prose prose-invert prose-slate max-w-none text-sm leading-relaxed text-slate-400 bg-slate-800/50 p-6 rounded-xl border border-slate-700/50 mb-8">
+                                                <p className="mb-4">
+                                                    <strong className="text-teal-400">Das Ziel:</strong> AudioTranskription ist ein Studienprojekt mit dem Ziel, ein großes, lokales Whisper‑Modell in eine anwenderfreundliche Desktop‑App zu integrieren. Die Hauptanforderung war eine reine Offline‑Lösung, damit sensible Audiodaten den Rechner nie verlassen.
+                                                </p>
+                                                <p className="mb-4">
+                                                    <strong className="text-teal-400">Die Umsetzung:</strong> Ich habe die GUI mit <code>tkinter</code> umgesetzt (<em>transcription_window.py</em>). Hier kann der Nutzer intuitiv Dateien wählen, den Prozess steuern und Ergebnisse prüfen. Die rechenintensive Logik habe ich in <em>whisper_worker.py</em> ausgelagert: Das Skript lädt das Modell (<code>large-v3.pt</code>) und führt die Transkription durch.
+                                                </p>
+                                                <p className="mb-4">
+                                                    <strong className="text-teal-400">Erweiterte Features:</strong> Um den Nutzwert zu erhöhen, ergänzte ich Funktionen zum Kopieren in die Zwischenablage, zum PDF-Export (ReportLab) und zur Audio-Bereinigung mittels <code>noisereduce</code>. Hilfs-Skripte und eine PyInstaller-Spec bereiten das Projekt für den Build auf Windows vor.
+                                                </p>
+                                            </div>
+                                            <div className="space-y-4 pt-4 border-t border-slate-800">
+                                                <h4 className="text-white font-bold text-sm">Lessons Learned</h4>
+                                                <div className="flex gap-3">
+                                                    <div className="mt-1 text-yellow-500"><Zap size={18} /></div>
+                                                    <div>
+                                                        <strong className="text-white block text-sm">GUI Freezing & Threading</strong>
+                                                        <p className="text-slate-400 text-sm">Die Inferenz blockierte anfangs die GUI. Lösung: Auslagerung der `transcribe()`-Funktion in einen separaten Python-Thread, um die Anwendung reaktionsfähig zu halten.</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-3">
+                                                    <div className="mt-1 text-red-400"><AlertTriangle size={18} /></div>
+                                                    <div>
+                                                        <strong className="text-white block text-sm">Ressourcen-Management</strong>
+                                                        <p className="text-slate-400 text-sm">Große lokale Modelle benötigen viel RAM. Ein Lade-Check verhindert Abstürze bei unzureichendem Speicher.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    {/* FOOTER */}
+                    <footer className="bg-slate-900 border-t border-slate-800 py-12 text-center text-slate-500 text-sm">
+                        <div className="flex justify-center gap-6 mb-6">
+                            <a href="#" className="hover:text-teal-400 transition-colors"><Mail size={20} /></a>
+                        </div>
+                        <p>© 2024 Entwickler Portfolio. Erstellt mit React & Tailwind CSS.</p>
+                        <p className="mt-2 text-xs opacity-50">Projekt AudioTranskription</p>
+                    </footer>
+                </div>
+            );
+        };
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
