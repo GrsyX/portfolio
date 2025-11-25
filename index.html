@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio | Yunus Emre Gürsoy</title>
     
+    <!-- React & Tailwind Setup -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <script>
@@ -33,11 +35,15 @@
 
     <style>
         body { background-color: #020617; color: #e2e8f0; }
+        
+        /* Glassmorphismus Panel */
         .glass-panel {
             background: rgba(30, 41, 59, 0.4);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
+        
+        /* Farbverlauf */
         .gradient-text {
             background: linear-gradient(to right, #2dd4bf, #3b82f6);
             -webkit-background-clip: text;
@@ -45,6 +51,8 @@
             background-clip: text;
             color: transparent;
         }
+        
+        /* Glow Hintergrund */
         .glow-bg {
             position: absolute;
             width: 600px;
@@ -54,6 +62,11 @@
             pointer-events: none;
             z-index: -1;
         }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -61,28 +74,19 @@
 
     <script type="text/babel">
         const { useState, useEffect } = React;
-
-        // --- LUCIDE ICON FIX ---
+        
+        // --- LUCIDE ICON ---
         const createLucideIcon = (iconName, iconData) => {
             if (!iconData || !Array.isArray(iconData)) {
                 return () => null;
             }
-            
             const [tag, attrs, children] = iconData;
             const safeAttrs = (attrs && typeof attrs === 'object' && !Array.isArray(attrs)) ? attrs : {};
             const childrenToRender = Array.isArray(children) ? children : [];
             
             return ({ color = "currentColor", size = 24, strokeWidth = 2, className, ...props }) => {
                 return (
-                    <svg
-                        {...safeAttrs}
-                        width={size}
-                        height={size}
-                        stroke={color}
-                        strokeWidth={strokeWidth}
-                        className={`lucide lucide-${iconName} ${className || ''}`}
-                        {...props}
-                    >
+                    <svg {...safeAttrs} width={size} height={size} stroke={color} strokeWidth={strokeWidth} className={`lucide lucide-${iconName} ${className || ''}`} {...props}>
                         {childrenToRender.map((child, index) => {
                             if (!Array.isArray(child)) return null;
                             const [childTag, childAttrs] = child;
@@ -93,6 +97,9 @@
                 );
             };
         };
+
+        const lucideSource = lucide.icons || lucide;
+        const iconList = ["ArrowRight", "Terminal", "Cpu", "ExternalLink"];
         
         const Icons = {};
         iconList.forEach(name => {
@@ -103,7 +110,7 @@
             }
         });
         
-        const { Github, Mail, ArrowRight, Terminal, Cpu, ExternalLink, GraduationCap, MapPin, Linkedin } = Icons;
+        const { ArrowRight, Terminal, Cpu, ExternalLink } = Icons;
 
         // --- COMPONENTS ---
 
@@ -136,6 +143,8 @@
             </a>
         );
 
+        // --- MAIN ---
+
         const App = () => {
             return (
                 <div className="min-h-screen relative overflow-hidden selection:bg-sky-500/30 selection:text-sky-200">
@@ -147,25 +156,33 @@
                         
                         {/* HEADER */}
                         <header className="mb-24">
-                            <h1 className="text-6xl md:text-7xl font-bold mb-6 tracking-tight">
+                            
+                            <h1 className="text-6xl md:text-7xl font-bold mb-8 tracking-tight">
                                 <span className="gradient-text">Yunus Emre Gürsoy</span>
                             </h1>
                             
-                            <p className="text-xl text-slate-400 max-w-2xl leading-relaxed mb-8 font-light">
-                                Ingenieurinformatik-Student an der HTW Berlin. <br/>
-                                Auf dieser Seite möchte ich euch meine Projekte vorstellen.
-                            </p>
-                            
+                            <div className="flex flex-col gap-6 items-start">
+                                <div className="text-slate-400 font-mono text-sm tracking-wide bg-slate-900/30 px-4 py-2 rounded-lg border border-slate-800/50 inline-block">
+                                    <span className="text-sky-400 font-bold mr-2">Current:</span> 
+                                    Student at HTW Berlin <span className="mx-2 text-slate-600">|</span> B.Sc. Ingenieurinformatik
+                                </div>
+
+                                <p className="text-xl text-slate-300 max-w-2xl leading-relaxed font-light">
+                                    Auf dieser Seite möchte ich euch meine Projekte vorstellen.
+                                </p>
+                            </div>
+
                         </header>
 
                         {/* PROJECTS SECTION */}
                         <section>
                             <div className="flex items-center justify-between mb-10">
-                                <h2 className="text-3xl font-bold text-white">Meine Projekte</h2>
+                                <h2 className="text-3xl font-bold text-white">Software-Projekte & Portfolios</h2>
                                 <div className="h-px bg-slate-800 flex-1 ml-6"></div>
                             </div>
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Projekt 1: Audio Transkription AI Tool */}
                                 <ProjectCard 
                                     title="AudioTranskription AI Tool"
                                     type="Desktop App"
@@ -174,9 +191,10 @@
                                     link="audio-transkription/"
                                 />
                                 
-                                {/* Weitere Projekte Platzhalter*/}
+                                {/* PLATZHALTER FÜR ZUKÜNFTIGE PROJEKTE */}
                             </div>
                         </section>
+
                     </div>
                 </div>
             );
