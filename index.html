@@ -11,7 +11,203 @@
         .htw-tag { display: inline-block; background-color: #e0f2fe; color: #0369a1; padding: 0.2rem 0.6rem; border-radius: 99px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; }
         .bio { color: #4b5563; font-size: 1.1rem; margin: 0; }
         
-        h2 { border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-top: 3rem; color: #374151; font-size: 1.5rem; }
+        h2 { border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-top: 3rem; color:<!DOCTYPE html>
+<html lang="de" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio | Yunus Emre Gürsoy</title>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        primary: '#0F172A',
+                        secondary: '#1E293B',
+                        accent: '#38BDF8',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #020617; color: #e2e8f0; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #2dd4bf, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+        .glow-bg {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- LUCIDE ICON FIX ---
+        const createLucideIcon = (iconName, iconData) => {
+            if (!iconData || !Array.isArray(iconData)) {
+                return () => null;
+            }
+            
+            const [tag, attrs, children] = iconData;
+            const safeAttrs = (attrs && typeof attrs === 'object' && !Array.isArray(attrs)) ? attrs : {};
+            const childrenToRender = Array.isArray(children) ? children : [];
+            
+            return ({ color = "currentColor", size = 24, strokeWidth = 2, className, ...props }) => {
+                return (
+                    <svg
+                        {...safeAttrs}
+                        width={size}
+                        height={size}
+                        stroke={color}
+                        strokeWidth={strokeWidth}
+                        className={`lucide lucide-${iconName} ${className || ''}`}
+                        {...props}
+                    >
+                        {childrenToRender.map((child, index) => {
+                            if (!Array.isArray(child)) return null;
+                            const [childTag, childAttrs] = child;
+                            const safeChildAttrs = (childAttrs && typeof childAttrs === 'object' && !Array.isArray(childAttrs)) ? childAttrs : {};
+                            return React.createElement(childTag, { ...safeChildAttrs, key: index });
+                        })}
+                    </svg>
+                );
+            };
+        };
+
+        // Icons initialisieren
+        const lucideSource = lucide.icons || lucide;
+        const iconList = [
+            "Github", "Mail", "ArrowRight", "Terminal", "Cpu", 
+            "ExternalLink", "GraduationCap", "MapPin", "Linkedin"
+        ];
+        
+        const Icons = {};
+        iconList.forEach(name => {
+            if (lucideSource[name]) {
+                Icons[name] = createLucideIcon(name, lucideSource[name]);
+            } else {
+                Icons[name] = () => null; 
+            }
+        });
+        
+        const { Github, Mail, ArrowRight, Terminal, Cpu, ExternalLink, GraduationCap, MapPin, Linkedin } = Icons;
+
+        // --- COMPONENTS ---
+
+        const TechTag = ({ label }) => (
+            <span className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-slate-800/80 text-slate-300 border border-slate-700/50 font-mono">
+                {label}
+            </span>
+        );
+
+        const ProjectCard = ({ title, description, tags, link, type }) => (
+            <a href={link} className="group relative block glass-panel rounded-2xl p-1 transition-all duration-300 hover:border-sky-500/30 hover:-translate-y-1 hover:shadow-2xl hover:shadow-sky-900/20">
+                <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-indigo-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="relative p-6 h-full flex flex-col">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[10px] font-bold uppercase tracking-wider">
+                            {type}
+                        </div>
+                        <ExternalLink size={18} className="text-slate-500 group-hover:text-sky-400 transition-colors" />
+                    </div>
+                    
+                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-sky-400 transition-colors">{title}</h3>
+                    <p className="text-slate-400 text-sm mb-6 leading-relaxed line-clamp-3">
+                        {description}
+                    </p>
+                    
+                    <div className="mt-auto pt-4 border-t border-slate-800/50 flex flex-wrap gap-2">
+                        {tags.map((tag, i) => <TechTag key={i} label={tag} />)}
+                    </div>
+                </div>
+            </a>
+        );
+
+        const App = () => {
+            return (
+                <div className="min-h-screen relative overflow-hidden selection:bg-sky-500/30 selection:text-sky-200">
+                    {/* Background */}
+                    <div className="glow-bg top-[-200px] left-[-200px]"></div>
+                    <div className="glow-bg bottom-0 right-[-200px] bg-[radial-gradient(circle,rgba(129,140,248,0.1)_0%,rgba(0,0,0,0)_70%)]"></div>
+
+                    <div className="max-w-5xl mx-auto px-6 py-20">
+                        
+                        {/* HEADER */}
+                        <header className="mb-24">
+                            <h1 className="text-6xl md:text-7xl font-bold mb-6 tracking-tight">
+                                <span className="gradient-text">Yunus Emre Gürsoy</span>
+                            </h1>
+                            
+                            <p className="text-xl text-slate-400 max-w-2xl leading-relaxed mb-8 font-light">
+                                Ingenieurinformatik-Student an der HTW Berlin. <br/>
+                                Ich baue performante Software-Lösungen an der Schnittstelle von <span className="text-white font-medium">KI, Desktop-Entwicklung &amp; Hardware</span>.
+                            </p>
+
+                        </header>
+
+                        {/* PROJECTS SECTION */}
+                        <section>
+                            <div className="flex items-center justify-between mb-10">
+                                <h2 className="text-3xl font-bold text-white">Software-Projekte & Portfolios</h2>
+                                <div className="h-px bg-slate-800 flex-1 ml-6"></div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <ProjectCard 
+                                    title="AudioTranskription AI Tool"
+                                    type="Desktop App"
+                                    description="Eine lokale, hoch-performante Desktop-Anwendung zur sicheren Transkription sensibler Audiodaten. Nutzt OpenAI Whisper lokal (Offline) mit einer Custom-Tkinter-GUI und automatischem PDF-Reporting."
+                                    tags={["Python 3.10", "tkinter", "OpenAI Whisper", "ffmpeg", "ReportLab (PDF Engine)", "NoiseReduce"]}
+                                    link="audio-transkription/"
+                                />
+                                
+                                {/* Weitere Projekte */}
+                            </div>
+                        </section>
+
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html> #374151; font-size: 1.5rem; }
         
         .project-card { display: block; background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; text-decoration: none; color: inherit; transition: all 0.2s; }
         .project-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #3b82f6; }
@@ -37,7 +233,7 @@
         <a href="audio-transkription/" class="project-card">
             <div class="project-title">Audio Transkription AI Tool</div>
             <p class="project-desc">
-                Eine lokale, datenschutzkonforme Desktop-App (Python/Tkinter) zur Umwandlung von Sprache in Text mittels OpenAI Whisper. 100% Offline.
+                Eine lokale, datenschutzkonforme Desktop-App (Python/Tkinter) zur Umwandlung von Sprache in Text mittels OpenAI Whisper mit Übersetzung. 100% Offline.
             </p>
             <div class="tags">
                 <span>Python</span>
