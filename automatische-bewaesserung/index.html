@@ -121,7 +121,7 @@
                 </div>
                 <div className="flex-1 relative bg-black min-h-[500px] flex items-center justify-center group">
                     <img 
-                        src="projekt_aufbau.jpg" 
+                        src="projekt_aufbau.png" 
                         alt="Arduino Aufbau" 
                         className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500"
                         onError={(e) => {
@@ -129,7 +129,6 @@
                             e.target.parentElement.innerHTML = `
                                 <div class="flex flex-col items-center justify-center h-full text-slate-500 p-8 text-center">
                                     <p class="mb-2 font-bold text-emerald-500">Bild nicht gefunden</p>
-                                    <p class="text-xs text-slate-400">Bitte speichere dein Foto als <br/><code class="bg-slate-800 px-1 py-0.5 rounded text-emerald-300">projekt_aufbau.jpg</code><br/> in diesem Ordner.</p>
                                 </div>
                             `;
                         }}
@@ -155,7 +154,7 @@
                         controls 
                         className="w-full h-full object-contain max-h-[400px]"
                         src="Automatische Bewässerungssystem mit Arduino.mp4"
-                        poster="projekt_aufbau.jpg"
+                        poster="projekt_aufbau.png"
                     >
                         Dein Browser unterstützt das Video-Tag nicht.
                     </video>
