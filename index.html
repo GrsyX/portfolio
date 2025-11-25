@@ -36,14 +36,12 @@
     <style>
         body { background-color: #020617; color: #e2e8f0; }
         
-        /* Glassmorphismus Panel */
         .glass-panel {
             background: rgba(30, 41, 59, 0.4);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
-        /* Farbverlauf */
         .gradient-text {
             background: linear-gradient(to right, #2dd4bf, #3b82f6);
             -webkit-background-clip: text;
@@ -52,7 +50,6 @@
             color: transparent;
         }
         
-        /* Glow Hintergrund */
         .glow-bg {
             position: absolute;
             width: 600px;
@@ -77,29 +74,24 @@
         
         // --- LUCIDE ICON ---
         const createLucideIcon = (iconName, iconData) => {
-            if (!iconData || !Array.isArray(iconData)) {
-                return () => null;
-            }
+            if (!iconData || !Array.isArray(iconData)) return () => null;
             const [tag, attrs, children] = iconData;
             const safeAttrs = (attrs && typeof attrs === 'object' && !Array.isArray(attrs)) ? attrs : {};
             const childrenToRender = Array.isArray(children) ? children : [];
-            
-            return ({ color = "currentColor", size = 24, strokeWidth = 2, className, ...props }) => {
-                return (
-                    <svg {...safeAttrs} width={size} height={size} stroke={color} strokeWidth={strokeWidth} className={`lucide lucide-${iconName} ${className || ''}`} {...props}>
-                        {childrenToRender.map((child, index) => {
-                            if (!Array.isArray(child)) return null;
-                            const [childTag, childAttrs] = child;
-                            const safeChildAttrs = (childAttrs && typeof childAttrs === 'object' && !Array.isArray(childAttrs)) ? childAttrs : {};
-                            return React.createElement(childTag, { ...safeChildAttrs, key: index });
-                        })}
-                    </svg>
-                );
-            };
+            return ({ color = "currentColor", size = 24, strokeWidth = 2, className, ...props }) => (
+                <svg {...safeAttrs} width={size} height={size} stroke={color} strokeWidth={strokeWidth} className={`lucide lucide-${iconName} ${className || ''}`} {...props}>
+                    {childrenToRender.map((child, index) => {
+                        if (!Array.isArray(child)) return null;
+                        const [childTag, childAttrs] = child;
+                        const safeChildAttrs = (childAttrs && typeof childAttrs === 'object' && !Array.isArray(childAttrs)) ? childAttrs : {};
+                        return React.createElement(childTag, { ...safeChildAttrs, key: index });
+                    })}
+                </svg>
+            );
         };
 
         const lucideSource = lucide.icons || lucide;
-        const iconList = ["ArrowRight", "Terminal", "Cpu", "ExternalLink"];
+        const iconList = ["ExternalLink", "ArrowRight"]; 
         
         const Icons = {};
         iconList.forEach(name => {
@@ -110,7 +102,7 @@
             }
         });
         
-        const { ArrowRight, Terminal, Cpu, ExternalLink } = Icons;
+        const { ExternalLink, ArrowRight } = Icons;
 
         // --- COMPONENTS ---
 
@@ -143,7 +135,7 @@
             </a>
         );
 
-        // --- MAIN ---
+        // --- MAIN APP ---
 
         const App = () => {
             return (
@@ -164,12 +156,9 @@
                             <div className="flex flex-col gap-6 items-start">
                                 <div className="text-slate-400 font-mono text-sm tracking-wide bg-slate-900/30 px-4 py-2 rounded-lg border border-slate-800/50 inline-block">
                                     <span className="text-sky-400 font-bold mr-2">Current:</span> 
-                                    Student at HTW Berlin <span className="mx-2 text-slate-600">|</span> B.Sc. Ingenieurinformatik
+                                    Student at HTW Berlin <span className="mx-2 text-slate-600">|</span> Bachelor of Science, Ingenieurinformatik
                                 </div>
 
-                                <p className="text-xl text-slate-300 max-w-2xl leading-relaxed font-light">
-                                    Als angehender Ingenieurinformatiker verbinde ich technisches Verständnis mit praktischer Umsetzungskompetenz.
-                                </p>
                                 <p className="text-xl text-slate-300 max-w-2xl leading-relaxed font-light">
                                     Auf dieser Seite möchte ich euch meine Projekte vorstellen.
                                 </p>
@@ -185,16 +174,23 @@
                             </div>
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Projekt 1: Audio Transkription AI Tool */}
+                                {/* PROJEKT 1 AudioTranskription AI Tool*/}
                                 <ProjectCard 
                                     title="AudioTranskription AI Tool"
                                     type="Desktop App"
                                     description="Eine lokale, hoch-performante Desktop-Anwendung zur sicheren Transkription sensibler Audiodaten. Nutzt OpenAI Whisper lokal (Offline) mit einer Custom-Tkinter-GUI und automatischem PDF-Reporting."
-                                    tags={["Python 3.10", "tkinter", "OpenAI Whisper", "ffmpeg", "ReportLab (PDF Engine)", "NoiseReduce"]}
+                                    tags={["Python 3.10", "Whisper AI", "Tkinter", "Multi-Threading"]}
                                     link="audio-transkription/"
                                 />
                                 
-                                {/* PLATZHALTER FÜR ZUKÜNFTIGE PROJEKTE */}
+                                {/*  PROJEKT 2 Automatische Bewässerung (IoT) */}
+                                <ProjectCard 
+                                    title="Automatische Bewässerung (IoT)"
+                                    type="Embedded System"
+                                    description="Ein Arduino-basiertes System zur autonomen Überwachung und Bewässerung von Pflanzen. Verwendet kapazitive Sensoren, Relais-Steuerung und eine Custom C++ State-Machine für optimale Pflege."
+                                    tags={["Arduino C++", "Sensors", "Hardware", "Automation"]}
+                                    link="automatische-bewaesserung/"
+                                />
                             </div>
                         </section>
 
