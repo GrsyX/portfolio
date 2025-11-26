@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="de" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informationsbot Treptow-Köpenick | Portfolio</title>
+    
+    <!-- React & Tailwind Setup -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0F172A',
+                        secondary: '#1E293B',
+                        accent: '#38BDF8',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #020617; color: #e2e8f0; }
+        
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(to right, #2dd4bf, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .gradient-text-berlin {
+            background: linear-gradient(to right, #fb7185, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .glow-bg {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // --- LUCIDE ICON HELPER ---
+        const createLucideIcon = (iconName, iconData) => {
+            if (!iconData || !Array.isArray(iconData)) return () => null;
+            const [tag, attrs, children] = iconData;
+            const safeAttrs = (attrs && typeof attrs === 'object' && !Array.isArray(attrs)) ? attrs : {};
+            const childrenToRender = Array.isArray(children) ? children : [];
+            return ({ color = "currentColor", size = 24, strokeWidth = 2, className, ...props }) => (
+                <svg {...safeAttrs} width={size} height={size} stroke={color} strokeWidth={strokeWidth} className={`lucide lucide-${iconName} ${className || ''}`} {...props}>
+                    {childrenToRender.map((child, index) => {
+                        if (!Array.isArray(child)) return null;
+                        const [childTag, childAttrs] = child;
+                        const safeChildAttrs = (childAttrs && typeof childAttrs === 'object' && !Array.isArray(childAttrs)) ? childAttrs : {};
+                        return React.createElement(childTag, { ...safeChildAttrs, key: index });
+                    })}
+                </svg>
+            );
+        };
+
+        const lucideSource = lucide.icons || lucide;
+        const iconList = [
+            "ArrowLeft", "ArrowRight", "ExternalLink", "CheckCircle2", "AlertTriangle", "ShieldCheck", 
+            "Database", "Server", "Cpu", "Mic", "PlayCircle", "Users", "BarChart3"
+        ];
+        
+        const Icons = {};
+        iconList.forEach(name => {
+            if (lucideSource[name]) Icons[name] = createLucideIcon(name, lucideSource[name]);
+            else Icons[name] = () => null;
+        });
+        
+        const { 
+            ArrowLeft, ArrowRight, ExternalLink, CheckCircle2, AlertTriangle, ShieldCheck, 
+            Database, Server, Cpu, Mic, PlayCircle, Users, BarChart3
+        } = Icons;
+
+        // --- SHARED COMPONENTS ---
+
+        const TechBadge = ({ label, colorClass = "hover:text-teal-400 hover:border-teal-500/50" }) => (
+            <div className={`inline-flex items-center justify-center px-3 py-2 rounded-md bg-slate-800/80 border border-slate-700 text-slate-300 text-xs font-medium font-mono leading-none ${colorClass} transition-colors cursor-default shadow-sm`}>
+                {label}
+            </div>
+        );
+
+        const SectionTitle = ({ children, colorClass = "bg-teal-500" }) => (
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                <span className={`w-8 h-1 ${colorClass} rounded-full`}></span>
+                {children}
+            </h2>
+        );
+
+        const BulletPoint = ({ title, text, iconColor = "text-teal-500" }) => (
+            <div className="flex gap-3 items-start group">
+                <div className="mt-1.5">
+                    <CheckCircle2 size={18} className={`${iconColor} transition-colors`} />
+                </div>
+                <div>
+                    <strong className="text-white block mb-0.5">{title}</strong>
+                    <p className="text-slate-400 text-sm leading-relaxed">{text}</p>
+                </div>
+            </div>
+        );
+
+        // --- PROJECT: INFORMATIONSBOT BERLIN ---
+
+        const BotProject = () => {
+            // Chat Mockup Component
+            const ChatMockup = ({ className = "" }) => (
+                <div className={`bg-white rounded-xl shadow-2xl overflow-hidden w-full font-sans text-sm flex flex-col relative h-full border border-slate-200 ${className}`}>
+                    
+                    {/* Header im Berlin-Rot Stil */}
+                    <div className="bg-[#cc0000] px-4 py-3 flex items-center justify-between shrink-0 text-white shadow-md z-20">
+                        <div className="w-8 h-8 flex items-center justify-center cursor-pointer">
+                            <div className="space-y-1.5">
+                                <span className="block w-6 h-0.5 bg-white"></span>
+                                <span className="block w-6 h-0.5 bg-white"></span>
+                                <span className="block w-6 h-0.5 bg-white"></span>
+                            </div>
+                        </div>
+                        <span className="font-bold text-lg tracking-tight">AmtBot Treptow-Köpenick</span>
+                        <div className="w-8"></div>
+                    </div>
+
+                    {/* Chat Area */}
+                    <div className="flex-1 bg-white p-4 space-y-6 overflow-y-auto relative bg-[url('https://www.berlin.de/sen/inneres/_assets/buerger-und-staat/wahlen/wahlen-in-berlin/wappen_berlin.png')] bg-no-repeat bg-center bg-fixed" style={{backgroundSize: '30%', backgroundBlendMode: 'overlay', backgroundColor: 'rgba(255,255,255,0.95)'}}>
+                        
+                        {/* Bot Begrüßung & Sprachauswahl */}
+                        <div className="flex flex-col gap-4 animate-fade-in">
+                            <div className="flex gap-3 max-w-[90%]">
+                                <div className="w-8 h-8 rounded-full bg-[#cc0000] flex items-center justify-center text-white shrink-0 font-bold text-xs">B</div>
+                                <div className="bg-gray-200 p-4 rounded-xl rounded-tl-none text-slate-800 shadow-sm relative">
+                                    <p className="font-medium text-slate-700">Willkommen! Welche Sprache möchten Sie verwenden?</p>
+                                </div>
+                            </div>
+
+                            {/* Sprach Buttons */}
+                            <div className="flex flex-col gap-2 w-full max-w-[80%] mx-auto pl-11">
+                                <button className="w-full py-2.5 bg-gray-200 hover:bg-gray-300 text-slate-700 font-medium rounded-full transition-colors text-center">Deutsch</button>
+                                <button className="w-full py-2.5 bg-gray-200 hover:bg-gray-300 text-slate-700 font-medium rounded-full transition-colors text-center">English</button>
+                                <button className="w-full py-2.5 bg-gray-200 hover:bg-gray-300 text-slate-700 font-medium rounded-full transition-colors text-center">Türkçe</button>
+                                <button className="w-full py-2.5 bg-gray-200 hover:bg-gray-300 text-slate-700 font-medium rounded-full transition-colors text-center">العربية</button>
+                            </div>
+                        </div>
+
+                        {/* User Anfrage */}
+                        <div className="flex gap-3 max-w-[90%] ml-auto flex-row-reverse animate-fade-in" style={{animationDelay: '0.5s'}}>
+                            <div className="w-8 h-8 rounded-full bg-slate-400 flex items-center justify-center text-white shrink-0 font-bold text-xs">U</div>
+                            <div className="bg-rose-50 text-slate-800 p-3 rounded-xl rounded-tr-none shadow-sm border border-rose-100">
+                                <p>Ich brauche einen neuen Personalausweis. Was muss ich mitbringen und was kostet das?</p>
+                            </div>
+                        </div>
+
+                        {/* Bot Antwort */}
+                        <div className="flex gap-3 max-w-[95%] animate-fade-in" style={{animationDelay: '1s'}}>
+                            <div className="w-8 h-8 rounded-full bg-[#cc0000] flex items-center justify-center text-white shrink-0 font-bold text-xs">B</div>
+                            <div className="bg-gray-100 p-4 rounded-xl rounded-tl-none text-slate-800 shadow-sm border border-gray-200 text-xs md:text-sm">
+                                <p className="font-bold mb-2 text-[#cc0000]">Personalausweis beantragen (Dienstleistung 120703)</p>
+                                <p className="mb-2">Für die Beantragung benötigen Sie:</p>
+                                <ul className="list-disc pl-4 mb-3 space-y-1 text-slate-700">
+                                    <li>Aktuelles, biometrisches Passfoto</li>
+                                    <li>Ihren alten Personalausweis oder Reisepass</li>
+                                    <li>Ggf. Geburtsurkunde (bei Erstantrag)</li>
+                                </ul>
+                                <p className="mb-2 font-semibold">Gebühren:</p>
+                                <ul className="mb-3 space-y-1 text-slate-700">
+                                    <li>• <span className="font-mono font-bold">22,80 €</span> (unter 24 Jahren)</li>
+                                    <li>• <span className="font-mono font-bold">37,00 €</span> (ab 24 Jahren)</li>
+                                </ul>
+                                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-2 text-xs text-yellow-800">
+                                    <strong>Wichtig:</strong> Sie müssen persönlich erscheinen. Bitte vereinbaren Sie vorab einen Termin.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Input Area */}
+                    <div className="bg-white p-3 border-t border-slate-200 flex gap-2 shrink-0">
+                        <input 
+                            type="text" 
+                            placeholder="Ihre Nachricht..." 
+                            className="flex-1 bg-white border border-slate-300 text-slate-700 rounded-md px-4 py-2 focus:outline-none focus:border-[#cc0000] focus:ring-1 focus:ring-[#cc0000] transition-all"
+                        />
+                        <button className="bg-[#cc0000] hover:bg-[#aa0000] text-white px-6 py-2 rounded-md font-bold transition-colors shadow-md flex items-center gap-1">
+                            Senden
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const GifWindow = ({ className = "" }) => (
+                <div className={`bg-[#1e293b] rounded-lg border border-slate-700 shadow-2xl overflow-hidden w-full font-mono text-xs flex flex-col mt-8 ${className}`}>
+                    <div className="bg-slate-800 px-3 py-2 flex justify-between items-center border-b border-slate-700 shrink-0">
+                        <span className="text-rose-400 font-bold flex items-center gap-2"><PlayCircle size={14} /> Live Demo (GIF)</span>
+                    </div>
+                    <div className="flex-1 relative bg-black flex items-center justify-center group min-h-[300px]">
+                        <div className="flex flex-col items-center justify-center h-full text-slate-500 p-8 text-center">
+                            <p className="mb-2 font-bold text-rose-500">GIF-Platzhalter</p>
+                            <p className="text-xs text-slate-400">demo.gif</p>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen flex flex-col selection:bg-rose-500/30">
+                     <header className="px-6 py-6 flex justify-between items-center max-w-7xl mx-auto w-full">
+                        <a href="../index.html" onClick={(e) => { e.preventDefault(); window.location.reload(); }} className="flex items-center gap-2 text-rose-400 hover:text-rose-300 transition-colors font-mono text-sm">
+                            <ArrowLeft size={16} /> Zurück zur Übersicht
+                        </a>
+                    </header>
+                    <main className="flex-grow px-6 pb-20 pt-6">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="mb-24 text-left flex flex-col items-start">
+                                <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold tracking-wide uppercase mb-6">Chatbot System</div>
+                                <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">Informationsbot <span className="gradient-text-berlin">Treptow-Köpenick</span></h1>
+                                <p className="text-xl text-slate-400 leading-relaxed mb-8 max-w-3xl">Ein moderner, mehrsprachiger Chatbot zur Unterstützung von Bürger:innen bei Anfragen rund um das Bezirksamt. Das Projekt kombiniert eine intuitive React-Frontend-Oberfläche mit einem intelligenten Rasa-Backend und bietet umfassende Barrierefreiheit und Datenschutzkonformität.</p>
+                            </div>
+
+                            <div className="bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden">
+                                <div className="p-8 md:p-12 border-b border-slate-800">
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-12 items-stretch">
+                                        
+                                        {/* LEFT COLUMN */}
+                                        <div className="lg:col-span-7 flex flex-col">
+                                            <div className="mb-8">
+                                                <div className="flex items-center gap-3 mb-6">
+                                                    <h2 className="text-3xl font-bold text-white">AmtBot TK</h2>
+                                                    <span className="px-2 py-0.5 rounded bg-rose-900/40 text-rose-400 text-[10px] font-bold border border-rose-500/20 uppercase tracking-wider">WEB APP</span>
+                                                </div>
+                                                
+                                                <div className="border-l-4 border-rose-500 pl-6 py-2 bg-slate-800/20 rounded-r-lg mb-8">
+                                                    <p className="text-lg text-slate-200 font-light leading-relaxed">
+                                                        Intuitive React-Oberfläche mit intelligentem Rasa-Backend für barrierefreie und datenschutzkonforme Bürgerkommunikation.
+                                                    </p>
+                                                </div>
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-8">
+                                                    <div>
+                                                        <h3 className="text-xs uppercase text-slate-500 font-bold tracking-widest mb-2">MEINE ROLLE</h3>
+                                                        <p className="text-white font-medium text-base">Full Stack Lead & Projektleitung</p>
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-xs uppercase text-slate-500 font-bold tracking-widest mb-2">KERNAUFGABEN</h3>
+                                                        <p className="text-slate-400 text-sm leading-relaxed">Architektur (Frontend & Backend), Datenbank-Design, KI-Integration, DevOps und Team-Leitung.</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex flex-wrap gap-3 mb-10">
+                                                    {["React 18", "Vite", "Rasa AI", "FastAPI", "PostgreSQL", "Docker"].map(t => (
+                                                        <span key={t} className="px-3 py-1.5 rounded bg-slate-800 border border-slate-700 text-slate-300 text-xs font-mono font-medium hover:border-rose-500/50 hover:text-rose-400 transition-all cursor-default shadow-sm">
+                                                            {t}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="bg-gradient-to-r from-slate-800 to-slate-800/50 p-5 rounded-lg border-l-2 border-yellow-500 flex-grow">
+                                                <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2"><AlertTriangle size={16} className="text-yellow-500"/> Problemstellung & Bedarf</h3>
+                                                <ul className="space-y-2 text-sm text-slate-400 leading-relaxed list-disc pl-4 marker:text-yellow-500/50">
+                                                    <li><strong>Zugangshürden:</strong> Viele relevante Dienstleistungen sind durch Sprachbarrieren oder unübersichtliche Webseiten schwer zugänglich.</li>
+                                                    <li><strong>Effizienz:</strong> Bürger suchen schnelle Antworten ohne lange Wartezeiten oder persönliche Amtsbesuche.</li>
+                                                    <li><strong>Verfügbarkeit:</strong> Bedarf an Informationen außerhalb der regulären Öffnungszeiten.</li>
+                                                </ul>
+                                            </div>
+                                            <GifWindow />
+                                        </div>
+
+                                        {/* RIGHT COLUMN (Sticky Mockup) */}
+                                        <div className="lg:col-span-5 lg:sticky lg:top-8 h-fit">
+                                            <ChatMockup className="h-full min-h-[640px]" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-slate-900 p-8 md:p-12">
+                                    
+                                    {/* 1. SECTION: DEEP DIVE CASE STUDY */}
+                                    <div className="mb-16">
+                                        <SectionTitle colorClass="bg-rose-500">Deep Dive Case Study</SectionTitle>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                                            {/* Card 1: Challenge */}
+                                            <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700/50 hover:bg-slate-800 transition-colors">
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <div className="p-2 bg-rose-500/10 rounded-lg text-rose-400"><AlertTriangle size={20}/></div>
+                                                    <h4 className="text-white font-bold text-sm uppercase tracking-wide">Die Challenge</h4>
+                                                </div>
+                                                <p className="text-slate-400 text-sm leading-relaxed">
+                                                    Integration eines komplexen Tech-Stacks und Sicherstellung der Fakten-Treue (keine Halluzinationen). Die Schwierigkeit lag darin, React, Python-KI und SQL in einem performanten System zu vereinen, für das ich einen entscheidenden Anteil der Entwicklung trug.
+                                                </p>
+                                            </div>
+                                            
+                                            {/* Card 2: Lösung */}
+                                            <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700/50 hover:bg-slate-800 transition-colors">
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400"><CheckCircle2 size={20}/></div>
+                                                    <h4 className="text-white font-bold text-sm uppercase tracking-wide">Die Lösung</h4>
+                                                </div>
+                                                <p className="text-slate-400 text-sm leading-relaxed">
+                                                    Als Full Stack Lead entwarf ich die Architektur und implementierte die Anwendung maßgeblich. Ich entwickelte das React-Frontend, trainierte die KI-Modelle auf verifizierten Behördendaten und designte die Datenbank-Struktur.
+                                                </p>
+                                            </div>
+
+                                            {/* Card 3: Besonderheit */}
+                                            <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700/50 hover:bg-slate-800 transition-colors">
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400"><ShieldCheck size={20}/></div>
+                                                    <h4 className="text-white font-bold text-sm uppercase tracking-wide">Besonderheit</h4>
+                                                </div>
+                                                <p className="text-slate-400 text-sm leading-relaxed">
+                                                    Privacy-by-Design: Datenschutz steht an erster Stelle. Sensible Daten und Chatverläufe werden ausschließlich clientseitig (localStorage) gespeichert und nur nach aktiver Zustimmung des Nutzers persistiert.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 2. SECTION: GRID FÜR DETAILS */}
+                                    <div className="border-t border-slate-800 pt-12 space-y-16">
+                                        
+                                        {/* ZEILE 1 */}
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                                            {/* LEFT: Mehrwert & Nutzen */}
+                                            <div>
+                                                <SectionTitle colorClass="bg-emerald-500">Mehrwert & Nutzen</SectionTitle>
+                                                <div className="grid grid-cols-1 gap-4">
+                                                    <div className="bg-slate-800/30 p-4 rounded-lg border border-slate-700/30">
+                                                        <h4 className="text-white font-bold text-sm mb-3 flex items-center gap-2"><Users size={16} className="text-rose-400"/> Für Bürger</h4>
+                                                        <ul className="space-y-2 text-sm text-slate-400 list-disc pl-4 marker:text-rose-400">
+                                                            <li>Schneller Zugang zu Informationen (24/7)</li>
+                                                            <li>Mehrsprachige Unterstützung</li>
+                                                            <li>Zeitersparnis durch direkte Antworten</li>
+                                                        </ul>
+                                                    </div>
+                                                    <div className="bg-slate-800/30 p-4 rounded-lg border border-slate-700/30">
+                                                        <h4 className="text-white font-bold text-sm mb-3 flex items-center gap-2"><Server size={16} className="text-blue-400"/> Für das Bezirksamt</h4>
+                                                        <ul className="space-y-2 text-sm text-slate-400 list-disc pl-4 marker:text-blue-400">
+                                                            <li>Entlastung der Mitarbeiter bei Standardanfragen</li>
+                                                            <li>Effizientere Kommunikation & Modernisierung</li>
+                                                            <li>Verbesserte Bürgernähe</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* RIGHT: Besondere Leistungen */}
+                                            <div>
+                                                <SectionTitle colorClass="bg-rose-500">Besondere Leistungen</SectionTitle>
+                                                <div className="space-y-4">
+                                                    <BulletPoint 
+                                                        title="Projektleitung & Ownership" 
+                                                        text="Agile Planung, kontinuierliches Tracking des Fortschritts und proaktives Lösen von Herausforderungen als Lead eines 4-köpfigen Teams." 
+                                                        iconColor="text-yellow-500" 
+                                                    />
+                                                    <BulletPoint 
+                                                        title="Responsive Design & UX" 
+                                                        text="Entwicklung einer vollständig responsiven Oberfläche für Mobile & Desktop, inkl. Touch-Gesten, Darkmode und Barrierefreiheit." 
+                                                        iconColor="text-rose-400" 
+                                                    />
+                                                    <BulletPoint 
+                                                        title="Performance & Architektur" 
+                                                        text="Effiziente State-Verwaltung und Custom Hooks (z.B. für Suche-Debouncing) sorgen für ein flüssiges, professionelles Nutzererlebnis." 
+                                                        iconColor="text-blue-400" 
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* ZEILE 2 */}
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                                            {/* LEFT: Lessons Learned */}
+                                            <div>
+                                                <SectionTitle colorClass="bg-yellow-500">Lessons Learned</SectionTitle>
+                                                <div className="space-y-6">
+                                                    <div className="flex gap-3 group">
+                                                        <div className="mt-1 text-slate-500 group-hover:text-yellow-500 transition-colors"><AlertTriangle size={18} /></div>
+                                                        <div>
+                                                            <strong className="text-white block text-sm mb-1">Daten-Qualität vor Quantität</strong>
+                                                            <p className="text-slate-400 text-sm leading-relaxed">Beim Training der NLU-Modelle lernte ich, dass wenige, präzise Beispiele besser sind als große Mengen synthetischer Daten, um Halluzinationen zu minimieren.</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-3 group">
+                                                        <div className="mt-1 text-slate-500 group-hover:text-blue-400 transition-colors"><Database size={18} /></div>
+                                                        <div>
+                                                            <strong className="text-white block text-sm mb-1">Fragilität von Scrapern</strong>
+                                                            <p className="text-slate-400 text-sm leading-relaxed">Die Abhängigkeit vom HTML-Layout externer Behördenseiten verursachte Wartungsaufwand. Erkenntnis: Produktive Systeme benötigen offizielle APIs.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* RIGHT: Ausblick & Roadmap */}
+                                            <div>
+                                                <SectionTitle colorClass="bg-rose-500">Ausblick & Roadmap</SectionTitle>
+                                                
+                                                <div className="space-y-4">
+                                                    <div className="flex gap-3">
+                                                        <div className="mt-0.5 text-slate-500"><Server size={16} /></div>
+                                                        <p className="text-slate-400 text-sm">
+                                                            <strong className="text-slate-300 block mb-0.5">Containerisierung (Docker)</strong> 
+                                                            Vollständiges Deployment mittels Docker Compose für vereinfachte Skalierbarkeit und CI/CD-Pipelines.
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex gap-3">
+                                                        <div className="mt-0.5 text-slate-500"><Mic size={16} /></div>
+                                                        <p className="text-slate-400 text-sm">
+                                                            <strong className="text-slate-300 block mb-0.5">Barrierefreiheit (Voice UI)</strong> 
+                                                            Integration von Speech-to-Text (z.B. Whisper), um älteren Bürgern die Eingabe per Sprache zu ermöglichen.
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex gap-3">
+                                                        <div className="mt-0.5 text-slate-500"><Cpu size={16} /></div>
+                                                        <p className="text-slate-400 text-sm">
+                                                            <strong className="text-slate-300 block mb-0.5">Hybrid-KI Ansatz</strong> 
+                                                            Einsatz von RAG (Retrieval Augmented Generation), um Antworten flexibler zu formulieren, ohne die Faktenbasis zu verlassen.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const App = () => {
+            return <BotProject />;
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
