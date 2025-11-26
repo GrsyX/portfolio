@@ -359,30 +359,39 @@
                             {/* FLOWCHART */}
                             <FlowChartSVG />
 
-                            {/* BOTTOM SECTION */}
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-16">
-                                <div className="glass-panel p-6 rounded-xl">
-                                    <h3 className="font-bold text-white mb-4">Key Features</h3>
-                                    <ul className="space-y-4 text-sm text-slate-300">
-                                        <li className="flex gap-3"><CheckCircle2 className="text-emerald-400 shrink-0" size={18} /> <span>Kapazitive Messung (genauer als resistiv)</span></li>
-                                        <li className="flex gap-3"><CheckCircle2 className="text-emerald-400 shrink-0" size={18} /> <span>Schwellenwert-Kalibrierung</span></li>
-                                    </ul>
-                                </div>
-
-                                <div className="glass-panel p-6 rounded-xl border-t-4 border-t-yellow-500">
-                                    <h3 className="font-bold text-white mb-4">Lessons Learned</h3>
-                                    <div className="space-y-4">
-                                        <div className="text-sm">
-                                            <div className="flex items-center gap-2 text-yellow-400 mb-1 font-bold"><AlertTriangle size={14} /> Sensor-Korrosion</div>
-                                            <p className="text-slate-500">Statt resistive Sensoren, Wechsel auf kapazitive Sensoren.</p>
+                            {/* BOTTOM DETAILS */}
+                                <div className="bg-slate-900 p-8 md:p-12">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                                        <div>
+                                            <SectionTitle>Wichtigste Erfolge</SectionTitle>
+                                            <div className="space-y-6">
+                                                <BulletPoint title="Zuverlässigkeit" text="Das System läuft autonom über Wochen und verhindert zuverlässig Austrocknung." />
+                                                <BulletPoint title="Hardware-Integration" text="Erfolgreiche Ansteuerung von analogen Sensoren und Aktoren (Pumpe) über Relais." />
+                                                <BulletPoint title="Robustheit" text="Einsatz von kapazitiven Sensoren zur Vermeidung von Korrosion im Dauerbetrieb." />
+                                            </div>
                                         </div>
-                                        <div className="text-sm">
-                                            <div className="flex items-center gap-2 text-yellow-400 mb-1 font-bold"><Timer size={14} /> Timing ist alles</div>
-                                            <p className="text-slate-500">`delay()` blockiert den Code. Nutzung von `millis()` ermöglichte Multitasking (Messen + Blinken).</p>
+
+                                        <div>
+                                            <SectionTitle>Lessons Learned</SectionTitle>
+                                            <div className="space-y-4">
+                                                <div className="flex gap-3">
+                                                    <div className="mt-1 text-yellow-500"><AlertTriangle size={18} /></div>
+                                                    <div>
+                                                        <strong className="text-white block text-sm">Sensor-Korrosion</strong>
+                                                        <p className="text-slate-400 text-sm">Statt resistive Sensoren, Wechsel auf kapazitive Sensoren.</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-3">
+                                                    <div className="mt-1 text-emerald-400"><Timer size={18} /></div>
+                                                    <div>
+                                                        <strong className="text-white block text-sm">Timing ohne Blocking</strong>
+                                                        <p className="text-slate-400 text-sm">`delay()` blockiert den Code. Nutzung von `millis()` ermöglichte Multitasking.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
                         </div>
                     </main>
