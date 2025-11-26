@@ -136,7 +136,7 @@
           <img
             src="projekt_aufbau.png"
             alt="Arduino Aufbau"
-            className="w-full h-full object-cover object-top opacity-90 group-hover:opacity-100 transition-opacity duration-500"
+            className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-opacity duration-500"
             onError={(e) => {
               e.target.onerror = null;
               e.target.parentElement.innerHTML = `
@@ -392,7 +392,8 @@
 
                   <p>
                     <span className="text-emerald-400 font-semibold">Herausforderung (meine Idee):</span>{" "}
-                    Ich wollte ein System bauen, das nicht nur nach Uhrzeit arbeitet, sondern <span className="text-white font-semibold">situationsabhängig</span> handelt.
+                    Ich wollte ein System bauen, das nicht nur nach Uhrzeit arbeitet, sondern{" "}
+                    <span className="text-white font-semibold"> situationsabhängig</span> handelt.
                     Also habe ich zusätzlich einen <span className="text-white font-semibold">Automatik-Modus</span> umgesetzt, der die Bodenfeuchte misst und nur bei Bedarf pumpt.
                   </p>
 
@@ -435,6 +436,7 @@
                       </div>
                     </div>
                   </div>
+
                 </div>
               </div>
 
